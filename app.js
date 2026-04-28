@@ -229,13 +229,26 @@ const components = {
     `,
 
     // Admin Components
-    adminAlumni: () => `
+    adminAlumni: () => {
+        const searchTerm = state.searchTerm || '';
+        const filteredData = state.alumniData.filter(a => 
+            a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            a.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            a.position.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        return `
         <div class="space-y-6 fade-in">
             <!-- Sheet Link & Search -->
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div class="flex items-center gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-96">
                     <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
-                    <input type="text" placeholder="Cari alumni (Nama, Instansi, Posisi)..." class="w-full focus:outline-none text-sm text-slate-700 dark:text-slate-200 bg-transparent">
+                    <input type="text" 
+                        id="alumni-search"
+                        placeholder="Cari alumni (Nama, Instansi, Posisi)..." 
+                        class="w-full focus:outline-none text-sm text-slate-700 dark:text-slate-200 bg-transparent"
+                        value="${searchTerm}"
+                        oninput="ui.handleSearch(this.value)">
                 </div>
                 <a href="https://docs.google.com/spreadsheets/d/1JepgHxbtFpfwAxUO3DjZd6-TOpvtCr2d/edit?pli=1&gid=1674223372#gid=1674223372" target="_blank" class="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors font-medium text-sm">
                     <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
@@ -267,7 +280,7 @@ const components = {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-sm">
-                        ${state.alumniData.map(a => `
+                        ${filteredData.map(a => `
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-slate-800 dark:text-white">${a.name}</div>
@@ -308,8 +321,14 @@ const components = {
                 </table>
             </div>
         </div>
-    `,
-    adminReports: () => `
+    `;
+    },
+    adminReports: () => {
+        const totalAlumni = state.alumniData.length;
+        const totalResponden = Math.floor(totalAlumni * 0.8); // Simulasi 80% responden
+        const totalBekerja = state.alumniData.filter(a => a.status !== 'Mencari Kerja').length;
+        
+        return `
         <div class="space-y-8 fade-in">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
@@ -317,28 +336,28 @@ const components = {
                         <i data-lucide="users" class="w-6 h-6"></i>
                     </div>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Alumni</p>
-                    <p class="text-2xl font-bold text-slate-800 dark:text-white">1,240</p>
+                    <p class="text-2xl font-bold text-slate-800 dark:text-white">${totalAlumni}</p>
                 </div>
                 <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center mb-4">
                         <i data-lucide="check-circle" class="w-6 h-6"></i>
                     </div>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Responden</p>
-                    <p class="text-2xl font-bold text-slate-800 dark:text-white">856</p>
+                    <p class="text-2xl font-bold text-slate-800 dark:text-white">${totalResponden}</p>
                 </div>
                 <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center mb-4">
                         <i data-lucide="briefcase" class="w-6 h-6"></i>
                     </div>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Bekerja</p>
-                    <p class="text-2xl font-bold text-slate-800 dark:text-white">720</p>
+                    <p class="text-2xl font-bold text-slate-800 dark:text-white">${totalBekerja}</p>
                 </div>
                 <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center mb-4">
                         <i data-lucide="trending-up" class="w-6 h-6"></i>
                     </div>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Rerata Gaji</p>
-                    <p class="text-2xl font-bold text-slate-800 dark:text-white">6.5jt</p>
+                    <p class="text-2xl font-bold text-slate-800 dark:text-white">6.8jt</p>
                 </div>
             </div>
 
@@ -353,7 +372,8 @@ const components = {
                 </div>
             </div>
         </div>
-    `
+    `;
+    }
 };
 
 // Theme Logic
@@ -474,6 +494,21 @@ const ui = {
         if (sidebar) {
             sidebar.classList.toggle('hidden');
             lucide.createIcons();
+        }
+    },
+
+    handleSearch: (value) => {
+        state.searchTerm = value;
+        const content = document.getElementById('content-area');
+        if (content) {
+            content.innerHTML = components.adminAlumni();
+            lucide.createIcons();
+            // Refocus input and put cursor at end
+            const input = document.getElementById('alumni-search');
+            if (input) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
         }
     },
 
