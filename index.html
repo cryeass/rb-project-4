@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pelacakan Alumni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            text: '#f1f5f9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Dark mode transitions */
+        body { transition: background-color 0.3s, color 0.3s; }
+        .dark body { background-color: #0f172a; color: #f1f5f9; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+    <!-- Theme Toggle Floating Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="theme.toggle()" class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:scale-110 transition-all">
+            <i id="theme-icon" data-lucide="moon" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 fade-in">
+            <div class="text-center mb-8">
+                <div class="inline-flex p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl mb-4">
+                    <i data-lucide="graduation-cap" class="w-10 h-10 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Alumni Tracer Study</h1>
+                <p class="text-slate-500 dark:text-slate-400">Sistem Pelacakan Alumni Terpadu</p>
+            </div>
+
+            <div class="space-y-4">
+                <div id="login-error" class="hidden p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg flex items-center gap-2 mb-4">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span id="error-message">Username atau Password salah!</span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Username</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                        <input type="text" id="login-username" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white" placeholder="Masukkan username">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                        <input type="password" id="login-password" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white" placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <button onclick="auth.login('alumni')" class="w-full py-3 px-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> Masuk Alumni
+                    </button>
+                    <button onclick="auth.login('admin')" class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Masuk Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-view" class="hidden min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700 hidden lg:flex flex-col">
+            <div class="p-8 border-b border-slate-50 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-600 rounded-xl">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800 dark:text-white">Tracer Study</span>
+                </div>
+            </div>
+            
+            <nav id="sidebar-nav" class="flex-1 p-4 space-y-2">
+                <!-- Nav items generated by JS -->
+            </nav>
+
+            <div class="p-4 border-t border-slate-50 dark:border-slate-700">
+                <button onclick="auth.logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-medium">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 min-w-0">
+            <header class="h-20 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between px-8">
+                <h2 id="view-title" class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p id="user-name" class="font-bold text-slate-800 dark:text-white text-sm">Loading...</p>
+                        <p id="user-role" class="text-xs text-slate-500 dark:text-slate-400 capitalize">Role</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-area" class="flex-1 p-8 overflow-y-auto">
+                <!-- Content generated by JS -->
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
