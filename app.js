@@ -33,6 +33,12 @@ const state = {
             email: 'fajar.r@shopee.com', phone: '08561122334', address: 'Tangerang',
             socials: { linkedin: 'linkedin.com/in/fajarramadhan', ig: '@fajarr', fb: '-', tiktok: '@fajardesigner' },
             workAddress: 'Pacific Century Place, SCBD, Jakarta', workSocials: '@shopee_id'
+        },
+        { 
+            id: 6, name: 'Satrio Rahardianto', year: 2023, status: 'Swasta', company: 'Google Indonesia', position: 'Data Scientist',
+            email: 'satrio.r@gmail.com', phone: '081222334455', address: 'Jakarta Pusat',
+            socials: { linkedin: 'linkedin.com/in/satriorahardianto', ig: '@satrio_r', fb: 'Satrio Rahardianto', tiktok: '-' },
+            workAddress: 'Sentral Senayan II, Jakarta', workSocials: '@googleindonesia'
         }
     ],
     questionnaireStats: {
@@ -44,11 +50,13 @@ const state = {
 // UI Components
 const components = {
     // Alumni Components
-    alumniHome: () => `
+    alumniHome: () => {
+        const userName = state.user ? state.user.name : 'Alumni';
+        return `
         <div class="fade-in space-y-6">
             <div class="bg-blue-600 rounded-2xl p-8 text-white shadow-lg shadow-blue-100 relative overflow-hidden">
                 <div class="relative z-10">
-                    <h3 class="text-3xl font-bold mb-2">Halo, ${state.user.name}!</h3>
+                    <h3 class="text-3xl font-bold mb-2">Halo, ${userName}!</h3>
                     <p class="text-blue-100 text-lg max-w-md">Selamat datang di Sistem Pelacakan Alumni. Mari bantu kami meningkatkan kualitas institusi dengan mengisi data terbaru Anda.</p>
                 </div>
                 <i data-lucide="graduation-cap" class="absolute right-[-20px] bottom-[-20px] w-64 h-64 text-blue-500 opacity-20 rotate-12"></i>
@@ -78,8 +86,11 @@ const components = {
                 </button>
             </div>
         </div>
-    `,
-    alumniProfile: () => `
+    `;
+    },
+    alumniProfile: () => {
+        const userName = state.user ? state.user.name : '';
+        return `
         <div class="max-w-4xl mx-auto space-y-6 fade-in">
             <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
@@ -89,7 +100,7 @@ const components = {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                            <input type="text" class="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white" value="${state.user.name}">
+                            <input type="text" class="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white" value="${userName}">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
@@ -131,7 +142,8 @@ const components = {
                 </form>
             </div>
         </div>
-    `,
+    `;
+    },
     alumniJob: () => `
         <div class="max-w-4xl mx-auto space-y-6 fade-in">
             <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
@@ -426,13 +438,14 @@ const auth = {
 const ui = {
     initDashboard: () => {
         const nav = document.getElementById('sidebar-nav');
+        const mobileNav = document.getElementById('mobile-sidebar-nav');
         const userNameElem = document.getElementById('user-name');
         const userRoleElem = document.getElementById('user-role');
         
-        if (userNameElem) userNameElem.innerText = state.user.name;
-        if (userRoleElem) userRoleElem.innerText = state.user.role;
+        if (userNameElem) userNameElem.innerText = state.user ? state.user.name : 'Alumni';
+        if (userRoleElem) userRoleElem.innerText = state.user ? state.user.role : 'alumni';
 
-        const menuItems = state.user.role === 'admin' ? [
+        const menuItems = state.user && state.user.role === 'admin' ? [
             { id: 'reports', icon: 'pie-chart', label: 'Laporan & Statistik' },
             { id: 'alumni', icon: 'users', label: 'Kelola Alumni' },
         ] : [
@@ -442,21 +455,38 @@ const ui = {
             { id: 'survey', icon: 'clipboard-list', label: 'Kuesioner' },
         ];
 
-        nav.innerHTML = menuItems.map(item => `
+        const navHtml = menuItems.map(item => `
             <button onclick="ui.navigate('${item.id}')" id="nav-${item.id}" class="nav-btn flex items-center gap-3 w-full px-4 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-all">
                 <i data-lucide="${item.icon}" class="w-5 h-5"></i>
                 <span class="font-medium">${item.label}</span>
             </button>
         `).join('');
 
+        if (nav) nav.innerHTML = navHtml;
+        if (mobileNav) mobileNav.innerHTML = navHtml;
+
         lucide.createIcons();
         ui.navigate(menuItems[0].id);
     },
 
+    toggleMobileMenu: () => {
+        const sidebar = document.getElementById('mobile-sidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('hidden');
+            lucide.createIcons();
+        }
+    },
+
     navigate: (viewId) => {
+        console.log(`Navigating to: ${viewId}`);
         const content = document.getElementById('content-area');
         const title = document.getElementById('view-title');
         
+        if (!content || !title) {
+            console.error('Critical UI elements missing: content-area or view-title');
+            return;
+        }
+
         // Update active nav button
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
@@ -464,35 +494,49 @@ const ui = {
         const activeBtn = document.getElementById(`nav-${viewId}`);
         if (activeBtn) activeBtn.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
 
-        // Render content
-        switch(viewId) {
-            case 'home':
-                title.innerText = 'Beranda Dashboard';
-                content.innerHTML = components.alumniHome();
-                break;
-            case 'profile':
-                title.innerText = 'Profil Alumni';
-                content.innerHTML = components.alumniProfile();
-                break;
-            case 'job':
-                title.innerText = 'Data Pekerjaan';
-                content.innerHTML = components.alumniJob();
-                break;
-            case 'survey':
-                title.innerText = 'Kuesioner';
-                content.innerHTML = components.alumniSurvey();
-                break;
-            case 'alumni':
-                title.innerText = 'Kelola Data Alumni';
-                content.innerHTML = components.adminAlumni();
-                break;
-            case 'reports':
-                title.innerText = 'Laporan & Statistik';
-                content.innerHTML = components.adminReports();
-                ui.renderCharts();
-                break;
+        // Close mobile menu if open
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        if (mobileSidebar && !mobileSidebar.classList.contains('hidden')) {
+            mobileSidebar.classList.add('hidden');
         }
-        lucide.createIcons();
+
+        try {
+            // Render content
+            switch(viewId) {
+                case 'home':
+                    title.innerText = 'Beranda Dashboard';
+                    content.innerHTML = components.alumniHome();
+                    break;
+                case 'profile':
+                    title.innerText = 'Profil Alumni';
+                    content.innerHTML = components.alumniProfile();
+                    break;
+                case 'job':
+                    title.innerText = 'Data Pekerjaan';
+                    content.innerHTML = components.alumniJob();
+                    break;
+                case 'survey':
+                    title.innerText = 'Kuesioner';
+                    content.innerHTML = components.alumniSurvey();
+                    break;
+                case 'alumni':
+                    title.innerText = 'Kelola Data Alumni';
+                    content.innerHTML = components.adminAlumni();
+                    break;
+                case 'reports':
+                    title.innerText = 'Laporan & Statistik';
+                    content.innerHTML = components.adminReports();
+                    ui.renderCharts();
+                    break;
+                default:
+                    console.warn(`Unknown view: ${viewId}`);
+            }
+            lucide.createIcons();
+            console.log(`Successfully rendered view: ${viewId}`);
+        } catch (error) {
+            console.error(`Error rendering view ${viewId}:`, error);
+            content.innerHTML = `<div class="p-8 text-center text-red-500">Error rendering content: ${error.message}</div>`;
+        }
     },
 
     renderCharts: () => {
