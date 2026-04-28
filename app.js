@@ -455,7 +455,7 @@ const ui = {
 
     navigate: (viewId) => {
         const content = document.getElementById('content-area');
-        const title = document.getElementById('page-title');
+        const title = document.getElementById('view-title');
         
         // Update active nav button
         document.querySelectorAll('.nav-btn').forEach(btn => {
