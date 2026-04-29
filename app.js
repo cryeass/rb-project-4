@@ -39,6 +39,60 @@ const state = {
             email: 'satrio.r@gmail.com', phone: '081222334455', address: 'Jakarta Pusat',
             socials: { linkedin: 'linkedin.com/in/satriorahardianto', ig: '@satrio_r', fb: 'Satrio Rahardianto', tiktok: '-' },
             workAddress: 'Sentral Senayan II, Jakarta', workSocials: '@googleindonesia'
+        },
+        { 
+            id: 7, name: 'Catur Rahmani Oktavia', year: 2000, status: 'Swasta', company: 'Bank Mandiri', position: 'Senior Accountant',
+            email: 'catur.rahmani@email.com', phone: '081222334407', address: 'Surabaya',
+            socials: { linkedin: 'linkedin.com/in/caturrahmani', ig: '@catur_okt', fb: 'Catur Rahmani', tiktok: '-' },
+            workAddress: 'Tunjungan Plaza, Surabaya', workSocials: '@bankmandiri'
+        },
+        { 
+            id: 8, name: 'Muhammad Anshori', year: 2000, status: 'Swasta', company: 'Pertamina', position: 'Finance Manager',
+            email: 'm.anshori@pertamina.com', phone: '081222334408', address: 'Jakarta Selatan',
+            socials: { linkedin: 'linkedin.com/in/manshori', ig: '@anshori_m', fb: 'Muhammad Anshori', tiktok: '-' },
+            workAddress: 'Jl. Medan Merdeka Timur, Jakarta', workSocials: '@pertamina'
+        },
+        { 
+            id: 9, name: 'Achmad Sjafi\'y', year: 2000, status: 'PNS', company: 'BRIN Indonesia', position: 'Peneliti Senior',
+            email: 'sjafiy.achmad@brin.go.id', phone: '081222334409', address: 'Bogor',
+            socials: { linkedin: 'linkedin.com/in/sjafiy', ig: '-', fb: 'Achmad Sjafiy', tiktok: '-' },
+            workAddress: 'Kawasan Puspiptek Serpong', workSocials: '@brin_indonesia'
+        },
+        { 
+            id: 10, name: 'Achmad Budiman', year: 2000, status: 'Wirausaha', company: 'Budiman Tech', position: 'CEO & Founder',
+            email: 'budiman@budimantech.id', phone: '081222334410', address: 'Malang',
+            socials: { linkedin: 'linkedin.com/in/achmadbudiman', ig: '@achmad_b', fb: 'Achmad Budiman', tiktok: '@budiman.tech' },
+            workAddress: 'Jl. Ijen No. 12, Malang', workSocials: '@budimantech'
+        },
+        { 
+            id: 11, name: 'Farida Yuliati', year: 2000, status: 'PNS', company: 'Kementerian Agama', position: 'Kepala Sekolah',
+            email: 'farida.yuliati@kemenag.go.id', phone: '081222334411', address: 'Gresik',
+            socials: { linkedin: '-', ig: '@farida_y', fb: 'Farida Yuliati', tiktok: '-' },
+            workAddress: 'MAN 1 Gresik, Jawa Timur', workSocials: '@kemenag_ri'
+        },
+        { 
+            id: 12, name: 'Zia Ulva Ulinuha', year: 2025, status: 'Swasta', company: 'SMA Negeri 1 Jakarta', position: 'Guru Profesi',
+            email: 'zia.ulva@email.com', phone: '081222334412', address: 'Jakarta Utara',
+            socials: { linkedin: 'linkedin.com/in/ziaulva', ig: '@zia_ulva', fb: '-', tiktok: '@zia_educator' },
+            workAddress: 'Jl. Budi Utomo No. 7, Jakarta', workSocials: '@sman1jkt'
+        },
+        { 
+            id: 13, name: 'Zian Alfiana', year: 2025, status: 'Wirausaha', company: 'Zian Edutech', position: 'Content Creator',
+            email: 'zian.alfiana@email.com', phone: '081222334413', address: 'Yogyakarta',
+            socials: { linkedin: 'linkedin.com/in/zianalfiana', ig: '@zian_alf', fb: '-', tiktok: '@zian.edutech' },
+            workAddress: 'Sleman, DIY', workSocials: '@zian_edutech'
+        },
+        { 
+            id: 14, name: 'Zulfa Kunti Soraya', year: 2025, status: 'PNS', company: 'Dinas Pendidikan', position: 'CPNS Guru',
+            email: 'zulfa.kunti@jatengprov.go.id', phone: '081222334414', address: 'Semarang',
+            socials: { linkedin: '-', ig: '@zulfa_kunti', fb: 'Zulfa Kunti', tiktok: '-' },
+            workAddress: 'Jl. Pemuda No. 134, Semarang', workSocials: '@disdik_jateng'
+        },
+        { 
+            id: 15, name: 'Zumrotul Faizah', year: 2025, status: 'Mencari Kerja', company: '-', position: '-',
+            email: 'faizah.zum@email.com', phone: '081222334415', address: 'Kediri',
+            socials: { linkedin: '-', ig: '@zum_faizah', fb: '-', tiktok: '-' },
+            workAddress: '-', workSocials: '-'
         }
     ],
     questionnaireStats: {
