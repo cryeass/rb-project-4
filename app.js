@@ -3,6 +3,8 @@ const state = {
     user: null, // { role: 'alumni' | 'admin', name: string }
     currentView: 'dashboard',
     theme: localStorage.getItem('theme') || 'light',
+    fullAlumniData: [], // Untuk menampung data dari spreadsheet asli
+    isDataLoaded: false,
     alumniData: [
         { 
             id: 1, name: 'Budi Santoso', year: 2022, status: 'Swasta', company: 'Tech Corp', position: 'Software Engineer',
@@ -285,11 +287,14 @@ const components = {
     // Admin Components
     adminAlumni: () => {
         const searchTerm = state.searchTerm || '';
-        const filteredData = state.alumniData.filter(a => 
-            a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.position.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const sourceData = state.isDataLoaded ? state.fullAlumniData : state.alumniData;
+        
+        const filteredData = sourceData.filter(a => 
+            (a.name && a.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (a.company && a.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (a.position && a.position.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (a.id && a.id.toString().includes(searchTerm))
+        ).slice(0, 100);
 
         return `
         <div class="space-y-6 fade-in">
@@ -299,26 +304,39 @@ const components = {
                     <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
                     <input type="text" 
                         id="alumni-search"
-                        placeholder="Cari alumni (Nama, Instansi, Posisi)..." 
+                        placeholder="Cari alumni (Nama, NIM, Prodi)..."
                         class="w-full focus:outline-none text-sm text-slate-700 dark:text-slate-200 bg-transparent"
                         value="${searchTerm}"
                         oninput="ui.handleSearch(this.value)">
                 </div>
-                <a href="https://docs.google.com/spreadsheets/d/1JepgHxbtFpfwAxUO3DjZd6-TOpvtCr2d/edit?pli=1&gid=1674223372#gid=1674223372" target="_blank" class="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors font-medium text-sm">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                    Buka Spreadsheet Asli
-                </a>
+                <div class="flex items-center gap-2">
+                    ${!state.isDataLoaded ? `
+                        <button onclick="ui.loadFullData()" class="flex items-center gap-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all font-medium text-sm">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            Sinkronkan Data Asli (140rb+)
+                        </button>
+                    ` : `
+                        <div class="px-4 py-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-xl font-medium text-sm flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            Data Spreadsheet Terhubung
+                        </div>
+                    `}
+                    <a href="https://docs.google.com/spreadsheets/d/1JepgHxbtFpfwAxUO3DjZd6-TOpvtCr2d/edit?pli=1&gid=1674223372#gid=1674223372" target="_blank" class="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors font-medium text-sm">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        Excel
+                    </a>
+                </div>
             </div>
 
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">Data Lengkap Alumni</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">Data Lengkap Alumni</h3>
+                        <p class="text-xs text-slate-500 mt-1">${state.isDataLoaded ? `Menampilkan hasil pencarian dari ${sourceData.length.toLocaleString()} data` : 'Menampilkan data sampel'}</p>
+                    </div>
                     <div class="flex gap-2">
                         <button class="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i> Export CSV
-                        </button>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center gap-2">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Data
+                            <i data-lucide="download" class="w-4 h-4"></i> Export
                         </button>
                     </div>
                 </div>
@@ -327,9 +345,9 @@ const components = {
                     <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                         <tr>
                             <th class="px-6 py-4 font-semibold">Alumni</th>
-                            <th class="px-6 py-4 font-semibold">Kontak & Sosmed</th>
-                            <th class="px-6 py-4 font-semibold">Pekerjaan</th>
-                            <th class="px-6 py-4 font-semibold">Lokasi Kerja</th>
+                            <th class="px-6 py-4 font-semibold">NIM</th>
+                            <th class="px-6 py-4 font-semibold">Program Studi</th>
+                            <th class="px-6 py-4 font-semibold">Fakultas</th>
                             <th class="px-6 py-4 font-semibold text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -338,39 +356,31 @@ const components = {
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-slate-800 dark:text-white">${a.name}</div>
-                                    <div class="text-slate-500 dark:text-slate-400 text-xs">Lulus ${a.year}</div>
+                                    <div class="text-slate-500 dark:text-slate-400 text-xs">${a.workAddress.includes('Lulus') ? a.workAddress : 'Lulus ' + a.year}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-slate-700 dark:text-slate-300 font-medium">${a.email}</div>
-                                    <div class="text-slate-500 dark:text-slate-400 text-xs mb-2">${a.phone}</div>
-                                    <div class="flex gap-2">
-                                        ${a.socials.linkedin !== '-' ? '<i data-lucide="linkedin" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>' : ''}
-                                        ${a.socials.ig !== '-' ? '<i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-600 dark:text-pink-400"></i>' : ''}
-                                        ${a.socials.fb !== '-' ? '<i data-lucide="facebook" class="w-3.5 h-3.5 text-blue-800 dark:text-blue-500"></i>' : ''}
-                                        ${a.socials.tiktok !== '-' ? '<i data-lucide="video" class="w-3.5 h-3.5 text-slate-800 dark:text-slate-400"></i>' : ''}
-                                    </div>
+                                    <div class="text-slate-700 dark:text-slate-300 font-mono text-xs">${a.id}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="font-semibold text-slate-800 dark:text-white">${a.position}</div>
+                                    <div class="font-medium text-slate-800 dark:text-white">${a.position}</div>
+                                </td>
+                                <td class="px-6 py-4">
                                     <div class="text-slate-600 dark:text-slate-400">${a.company}</div>
-                                    <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                        a.status === 'PNS' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 
-                                        a.status === 'Swasta' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 
-                                        a.status === 'Wirausaha' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                    }">${a.status}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-slate-600 dark:text-slate-400 max-w-[200px] truncate">${a.workAddress}</div>
-                                    <div class="text-blue-600 dark:text-blue-400 text-xs italic">${a.workSocials}</div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-2">
-                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button class="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"><i data-lucide="eye" class="w-4 h-4"></i></button>
                                     </div>
                                 </td>
                             </tr>
                         `).join('')}
+                        ${filteredData.length === 0 ? `
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                                    Tidak ada data ditemukan
+                                </td>
+                            </tr>
+                        ` : ''}
                     </tbody>
                 </table>
             </div>
@@ -564,6 +574,71 @@ const ui = {
                 input.setSelectionRange(input.value.length, input.value.length);
             }
         }
+    },
+
+    loadFullData: () => {
+        const content = document.getElementById('content-area');
+        if (content) {
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 space-y-6 fade-in">
+                    <div class="relative">
+                        <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i data-lucide="database" class="w-6 h-6 text-blue-600 animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-lg font-bold text-slate-800 dark:text-white">Menghubungkan Database...</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm max-w-xs mx-auto">Memproses 142.293 data alumni dari spreadsheet asli. Mohon tunggu sebentar.</p>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Gunakan PapaParse untuk memproses CSV besar secara efisien
+        Papa.parse("alumni_data.csv", {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                console.log("Berhasil memproses", results.data.length, "baris");
+                
+                state.fullAlumniData = results.data.map((row, index) => ({
+                    id: row['NIM'] || `ALM-${index}`,
+                    name: row['Nama Lulusan'],
+                    year: row['Tahun Masuk'] || row['Tanggal Lulus']?.split(' ').pop() || '-',
+                    status: 'Alumni',
+                    company: row['Fakultas'] || '-',
+                    position: row['Program Studi'] || '-',
+                    email: '-',
+                    phone: '-',
+                    address: '-',
+                    socials: { linkedin: '-', ig: '-', fb: '-', tiktok: '-' },
+                    workAddress: row['Tanggal Lulus'] ? `Lulus: ${row['Tanggal Lulus']}` : '-',
+                    workSocials: '-'
+                }));
+                
+                state.isDataLoaded = true;
+                ui.navigate('alumni');
+                
+                // Notifikasi sukses
+                const title = document.getElementById('view-title');
+                if (title) {
+                    const originalTitle = title.innerText;
+                    title.innerHTML = `<span class="text-green-600 dark:text-green-400 flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5"></i> Database Sinkron!</span>`;
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        title.innerText = originalTitle;
+                    }, 3000);
+                }
+            },
+            error: function(err) {
+                console.error("Gagal memuat CSV:", err);
+                alert("Gagal sinkronisasi data. Pastikan file alumni_data.csv tersedia.");
+                ui.navigate('alumni');
+            }
+        });
     },
 
     navigate: (viewId) => {
